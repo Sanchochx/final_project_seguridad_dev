@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elecciones - Universidad Santo Tomas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo_usta.gif') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="content-container">
+            <h1 class="main-title">Elecciones Representante de Ingeniería de Sistemas 2025</h1>
+            <p class="subtitle">Universidad Santo Tomas Seccional Tunja</p>
+            
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo_usta.gif') }}" alt="Logo Universidad Santo Tomas">
+            </div>
+            
+            <p>Bienvenido al portal oficial de votación para elegir al próximo representante estudiantil del programa de Ingeniería de Sistemas de la Universidad Santo Tomas Seccional Tunja.</p>
+            
+            <p>Aquí podrás conocer a los candidatos, revisar sus propuestas y emitir tu voto de forma rápida, segura y transparente. 
+                ¡Tu participación es clave para construir una mejor comunidad académica!</p>
+            
+            <div class="important-notice">
+                <strong>Recuerda:</strong> Debes hablar con secretaria para que registren tu usuario y puedas votar.
+            </div>
+            
+            <div class="login-btn-container">
+                <a class="btn btn-success login-btn" href="{{ url_for('login') }}">Iniciar sesión</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

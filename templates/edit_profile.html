@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Editar Perfil</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo_usta.gif') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/home.png') }}" alt="home" class="d-inline-block align-text-top" style="width: 40px; height: 40px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="navbar-brand" href="{{ url_for('view_profile') }}">
+                            <img src="{{ url_for('uploaded_file', filename=current_user.profile.profile_picture if current_user.profile.profile_picture else 'default.jpg') }}" 
+                                alt="Perfil" class="profile-img" style="width: 40px; height: 40px;">
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <span class="nav-link welcome-text text-warning">
+                            <i class="far fa-user me-1"></i> Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-primary text-white" href="{{ url_for('candidates_list') }}">
+                            <i class="fas fa-users me-1"></i> Candidatos
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-success text-white" href="{{ url_for('vote') }}">
+                            <i class="fas fa-vote-yea me-1"></i> Votar
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-warning text-white" href="{{ url_for('results') }}">
+                            <i class="fas fa-chart-pie me-1"></i> Resultados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-btn btn btn-danger text-white" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 edit-profile-container">
+        <h2>Editar Perfil</h2>
+    
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message | safe }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-3 profile-image-container">
+                <label class="form-label">Imagen de perfil actual:</label>
+                <img src="{{ url_for('uploaded_file', filename=current_user.profile.profile_picture if current_user.profile.profile_picture else 'default.jpg') }}"
+                    alt="Imagen de perfil" class="img-fluid rounded" width="150">
+            </div> 
+            <div class="mb-3">
+                <label>Correo electrónico:</label>
+                {{ form.email(class="form-control", placeholder="Ingrese su correo.") }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Primer Nombre:</label>
+                {{ form.name(class="form-control", placeholder="Ingrese su primer nombre.") }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Primer Apellido:</label>
+                {{ form.last_name(class="form-control", placeholder="Ingrese su primer apellido.") }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Imagen de perfil:</label>
+                <div class="custom-file-upload">
+                    {{ form.profile_picture(class="form-control") }}
+                </div>
+            </div> 
+            <br>
+            <button type="submit" class="btn btn-primary">{{form.submit.label }}</button>
+            </form>
+        </div>
+
+        <script>
+            setTimeout(() => {
+                let alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    let bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);  
+        </script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>  
+    </body>
+</html>

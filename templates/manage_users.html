@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo_usta.gif') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/home.png') }}" alt="home" class="d-inline-block align-text-top" style="width: 40px; height: 40px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="navbar-brand" href="{{ url_for('view_profile') }}">
+                            <img src="{{ url_for('uploaded_file', filename=current_user.profile.profile_picture if current_user.profile.profile_picture else 'default.jpg') }}" 
+                                alt="Perfil" class="profile-img" style="width: 40px; height: 40px;">
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <span class="nav-link welcome-text text-warning">
+                            <i class="far fa-user me-1"></i> Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-primary text-white" href="{{ url_for('candidates_list') }}">
+                            <i class="fas fa-users me-1"></i> Candidatos
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-success text-white" href="{{ url_for('vote') }}">
+                            <i class="fas fa-vote-yea me-1"></i> Votar
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-warning text-white" href="{{ url_for('results') }}">
+                            <i class="fas fa-chart-pie me-1"></i> Resultados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-btn btn btn-danger text-white" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <h2 class="page-title">
+            <i class="fas fa-users-cog me-2"></i> Gestión de Usuarios
+        </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {% if category == 'success' %}
+                    <i class="fas fa-check-circle me-2"></i>
+                {% elif category == 'danger' %}
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                {% elif category == 'warning' %}
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                {% elif category == 'info' %}
+                    <i class="fas fa-info-circle me-2"></i>
+                {% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="search-container">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Buscar por usuario o identificación" value="{{ search }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fas fa-filter"></i></span>
+                        <select name="role" class="form-select">
+                            <option value="">-- Filtrar por rol --</option>
+                            <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Administrativo</option>
+                            <option value="estudiante" {% if role_filter == 'estudiante' %}selected{% endif %}>Estudiante</option>
+                            <option value="docente" {% if role_filter == 'docente' %}selected{% endif %}>Docente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary text-white w-100">
+                        <i class="fas fa-search me-1"></i> Buscar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{{ url_for('manage_users') }}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-undo me-1"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mt-4">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-id-card me-1"></i> ID</th>
+                        <th><i class="fas fa-user me-1"></i> Usuario</th>
+                        <th><i class="fas fa-user-tag me-1"></i> Rol</th>
+                        <th><i class="fas fa-cogs me-1"></i> Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            {% if user.role.value == 'admin' %}
+                            <span class="badge admin-badge">
+                                <i class="fas fa-user-shield me-1"></i> Administrativo
+                            </span>
+                            {% elif user.role.value == 'estudiante' %}
+                            <span class="badge estudiante-badge">
+                                <i class="fas fa-user-graduate me-1"></i> Estudiante
+                            </span>
+                            {% elif user.role.value == 'docente' %}
+                            <span class="badge docente-badge">
+                                <i class="fas fa-chalkboard-teacher me-1"></i> Docente
+                            </span>
+                            {% else %}
+                            {{ user.role.value }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('edit_user_password', user_id=user.id) }}" class="nav-link btn btn-warning text-white">
+                                    <i class="fas fa-key me-1"></i> Editar Contraseña
+                                </a>
+                                <a href="{{ url_for('edit_user_username', user_id=user.id) }}" class="nav-link btn btn-primary text-white">
+                                    <i class="fas fa-user-edit me-1"></i> Editar Username
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="d-inline" 
+                                    onsubmit="return confirm('¿Estás seguro de que deseas eliminar a {{ user.username }}? Esta acción no se puede deshacer.')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger text-white"">
+                                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="btn btn-secondary mt-4">
+            <i class="fas fa-arrow-left me-1"></i> Volver al Inicio
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

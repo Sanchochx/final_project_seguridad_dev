@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados | Universidad Santo Tomás</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo_usta.gif') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/home.png') }}" alt="home" class="d-inline-block align-text-top" style="width: 40px; height: 40px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="navbar-brand" href="{{ url_for('view_profile') }}">
+                            <img src="{{ url_for('uploaded_file', filename=current_user.profile.profile_picture if current_user.profile.profile_picture else 'default.jpg') }}" 
+                                alt="Perfil" class="profile-img" style="width: 40px; height: 40px;">
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <span class="nav-link welcome-text text-warning">
+                            <i class="far fa-user me-1"></i> Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-primary text-white" href="{{ url_for('candidates_list') }}">
+                            <i class="fas fa-users me-1"></i> Candidatos
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-success text-white" href="{{ url_for('vote') }}">
+                            <i class="fas fa-vote-yea me-1"></i> Votar
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-btn btn btn-warning text-white" href="{{ url_for('results') }}">
+                            <i class="fas fa-chart-pie me-1"></i> Resultados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-btn btn btn-danger text-white" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="results-container">
+        <div class="container">
+            <h1 class="page-title">Resultados de la Votación</h1>
+            <p class="results-description">Resultados actuales de la elección para el representante estudiantil de Ingeniería de Sistemas.</p>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show mt-2" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <div class="stats-card">
+                <div class="stats-header">
+                    <div class="stats-title">Resultados Generales</div>
+                    <div class="total-count">{{ total_votes }} votos emitidos</div>
+                </div>
+                
+                {% if results %}
+                    {% for item in results %}
+                        <div class="result-card {% if loop.first %}first-place{% endif %}">
+                            {% if loop.first %}
+                            {% endif %}
+                            
+                            {% if item.candidate.profile_picture %}
+                                <img src="{{ url_for('static', filename='candidate_photos/' + item.candidate.profile_picture) }}" alt="{{ item.candidate.name }}" class="candidate-photo">
+                            {% else %}
+                                <div class="candidate-photo d-flex align-items-center justify-content-center bg-light">
+                                    <span>Sin foto</span>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="candidate-info">
+                                <div class="candidate-name">{{ item.candidate.name }} {{ item.candidate.last_name }}</div>
+                                
+                                <div class="progress">
+                                    <div class="progress-bar {% if loop.first %}bg-success{% elif loop.index == 2 %}bg-info{% elif loop.index == 3 %}bg-primary{% else %}bg-secondary{% endif %}" 
+                                         role="progressbar" 
+                                         aria-valuenow="{{ item.percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        <span class="progress-percentage">{{ item.percentage }}%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="vote-details">
+                                    <span>{{ item.votes }} votos </span>
+                                    <span>{{ item.percentage }}% del total</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        No hay votos registrados todavía.
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if current_user.is_authenticated and current_user.role == 'estudiante' and not has_voted %}
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('vote') }}" class="btn btn-success btn-lg">Emitir mi voto</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        setTimeout(function() {
+            let alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                let fadeEffect = setInterval(() => {
+                    if (!alert.style.opacity) {
+                        alert.style.opacity = 1;
+                    }
+                    if (alert.style.opacity > 0) {
+                        alert.style.opacity -= 0.1;
+                    } else {
+                        clearInterval(fadeEffect);
+                        alert.remove();
+                    }
+                }, 50);
+            });
+        }, 5000);
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
